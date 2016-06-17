@@ -1,0 +1,32 @@
+<html>
+	<head>
+		<link href = '/Flat-UI/dist/css/vendor/bootstrap.min.css' rel = 'stylesheet' />
+		<link href = '/Flat-UI/dist/css/flat-ui.min.css' rel = 'stylesheet' />
+		<link href = '/css/stylesheet.css' rel = 'stylesheet' />
+		<script src = '/js/jquery.js'></script>
+		<script src = '/js/common.js'></script>
+		<title>Message</title>
+		<script>
+			$(document).ready(function() {
+				$.ajax({
+					'url': '/api/message',
+					'type': 'GET',
+					'data': {
+						'id': params.id
+					},
+					'dataType': 'json',
+					'success': function(response) {
+						if (response.success) {
+							$('title').text(response.title);
+							$('p#message-body').html(response.body.replace(/\n/g, '<br />'));
+						}
+						else alert(response.message);
+					}
+				});
+			});
+		</script>
+	</head>
+	<body class = 'allow-overflow'>
+		<p id = 'message-body'></p>
+	</body>
+</html>

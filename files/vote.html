@@ -1,0 +1,98 @@
+<html>
+	<head>
+		<link href = '/Flat-UI/dist/css/vendor/bootstrap.min.css' rel = 'stylesheet' />
+		<link href = '/Flat-UI/dist/css/flat-ui.min.css' rel = 'stylesheet' />
+		<link href = '/css/stylesheet.css' rel = 'stylesheet' />
+		<script src = '/js/jquery.js'></script>
+		<script src = '/js/common.js'></script>
+		<title>Vote</title>
+		<script>
+			function getIndexOfQuote(messageBody, quoteNumber) {
+				var searchString = '\n' + String(quoteNumber) + '. ';
+				var index = messageBody.indexOf(searchString);
+				if (index == -1) return index;
+				else return index + searchString.length;
+			}
+			$(document).ready(function() {
+				var voteTable = $('table#votes>tbody');
+				$.ajax({
+					'url': '/api/lastmessage',
+					'dataType': 'json',
+					'success': function(response) {
+						$('div#message-title').text('Voting on "' + response.title + '"');
+						var quoteNumber = 1;
+						var index;
+						while ((index = getIndexOfQuote(response.body, quoteNumber++)) != -1) {
+							voteTable.append(
+								$('<tr>').addClass('quote').append(
+									$('<td>').text('Votes: ').append(
+										$('<input>').attr('type', 'number').attr('min', 0).attr('max', 3).val(0)
+									)
+								).append(
+									$('<td>').html(response.body.substring(index, response.body.indexOf('\n\n', index)).replace(/\n/g, '<br/>'))
+								)
+							);
+						}
+					}
+				});
+				function submit() {
+					var quoteVotes = [];
+					var quotes = voteTable.children();
+					for (var i = 0, times; i < quotes.length; i++) {
+						for (times = 0; times < Number(quotes.eq(i).children('td').eq(0).children('input').val()); times++) quoteVotes.push(i + 1);
+					}
+					if (quoteVotes.length > 3) {
+						alert('You can only submit 3 votes total.');
+						return;
+					}
+					$('button#submit').removeClass('btn-success').addClass('btn-warning');
+					$.ajax({
+						'url': '/api/vote',
+						'type': 'POST',
+						'data': JSON.stringify({
+							'quotes': quoteVotes,
+							'token': params.token
+						}),
+						'dataType': 'json',
+						'success': function(response) {
+							if (response.success) $('button#submit').removeClass('btn-warning').addClass('btn-success');
+							else $('button#submit').removeClass('btn-warning').addClass('btn-danger');
+							alert('Success!');
+							window.location.assign('/');
+						},
+						'error': function() {
+							$('button#submit').removeClass('btn-warning').addClass('btn-danger');
+							setTimeout(function() {
+								$('button#submit').removeClass('btn-danger').addClass('btn-default');
+							}, 1000);
+						}
+					});
+				}
+				$('button#submit').click(submit);
+			});
+		</script>
+	</head>
+	<body>
+		<div id = 'body'>
+			<div id = 'vote-row'>
+				<div class = 'col-md-12'>
+					<div class = 'panel panel-default'>
+						<div class = 'panel-heading' id = 'message-title'>Vote</div>
+						<div class = 'panel-body'>
+							<table class = 'table' id = 'votes'>
+								<thead>
+									<tr>
+										<th>Votes</th><th>Quote</th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+							<button class = 'btn btn-success' id = 'submit'>Submit</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,60 @@
+<html>
+	<head>
+		<link href = '/Flat-UI/dist/css/vendor/bootstrap.min.css' rel = 'stylesheet' />
+		<link href = '/Flat-UI/dist/css/flat-ui.min.css' rel = 'stylesheet' />
+		<link href = '/css/stylesheet.css' rel = 'stylesheet' />
+		<script src = '/js/jquery.js'></script>
+		<script src = '/js/common.js'></script>
+		<title>Archives</title>
+		<script>
+			$.ajax({
+				'url': '/api/archives',
+				'dataType': 'json',
+				'success': function(response) {
+					var table = $('table#archive-entries>tbody');
+					for (var message = 0; message < response.messages.length; message++) {
+						table.append(
+							$('<tr>').append(
+								$('<td>').text(formatDate(new Date(response.messages[message].timestamp)))
+							).append(
+								$('<td>').addClass('hover').append(
+									$('<a>').attr('href', '/viewmessage.html?id=' + response.messages[message].messageID).text(response.messages[message].title)
+								)
+							)
+						);
+					}
+					$('td.hover').bind('touchstart mouseover', function(e) {
+						e.preventDefault();
+						$(this).addClass('hover-effect');
+					}).bind('touchend', function(e) {
+						e.preventDefault();
+						$(this).removeClass('hover-effect');
+						openMessage();
+					}).bind('mouseout', function() {
+						$(this).removeClass('hover-effect');
+					});
+				}
+			});
+		</script>
+		<style>
+			a {
+				color:#34495e
+			}
+			td.hover-effect>a {
+				color:#1abc9c;
+			}
+		</style>
+	</head>
+	<body>
+		<div id = 'body'>
+			<table id = 'archive-entries' class = 'table table-striped'>
+				<tbody>
+					<tr>
+						<td>Date</td>
+						<td>Title</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<link href = '/Flat-UI/dist/css/vendor/bootstrap.min.css' rel = 'stylesheet' />
+		<link href = '/Flat-UI/dist/css/flat-ui.min.css' rel = 'stylesheet' />
+		<link href = '/css/stylesheet.css' rel = 'stylesheet' />
+		<script src = '/js/jquery.js'></script>
+		<script src = '/js/common.js'></script>
+		<title>Confirm Subscription</title>
+		<script>
+			$(document).ready(function() {
+				var resultDiv = $('div#result');
+				function error() {
+					resultDiv.text('Subscription failed. Wrong key?');
+				}
+				$.ajax({
+					'url': '/api/confirm',
+					'type': 'GET',
+					'data': {
+						'key': params.key
+					},
+					'dataType': 'json',
+					'success': function(response) {
+						if (response.success) resultDiv.text('Successfully subscribed');
+						else error();
+					},
+					'error': error
+				})
+			});
+		</script>
+		<style>
+			div#result-wrapper {
+				position:absolute;
+				top:0px;
+				left:0px;
+				right:0px;
+				bottom:0px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id = 'body'>
+			<div class = 'panel panel-default' id = 'result-wrapper'>
+				<div class = 'panel-body' id = 'result'></div>
+			</div>
+		</div>
+	</body>
+</html>

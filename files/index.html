@@ -1,0 +1,135 @@
+<html>
+	<head>
+		<link href = '/Flat-UI/dist/css/vendor/bootstrap.min.css' rel = 'stylesheet' />
+		<link href = '/Flat-UI/dist/css/flat-ui.min.css' rel = 'stylesheet' />
+		<link href = '/css/stylesheet.css' rel = 'stylesheet' />
+		<script src = '/js/jquery.js'></script>
+		<script src = '/js/common.js'></script>
+		<title>QOTW</title>
+		<script>
+			var lastMessage;
+			$.ajax({
+				'url': '/api/lastmessage',
+				'dataType': 'json',
+				'success': function(response) {
+					lastMessage.children('div.panel-heading').text(response.title + ' (' + formatDate(new Date(response.timestamp), true) + ')');
+					lastMessage.children('div.panel-body').html(response.body.replace(/\n/g, '<br />'));
+				}
+			});
+			$(document).ready(function() {
+				lastMessage = $('div#last-message');
+				$('textarea#quote').keyup(function(e) {
+					if (e.which === 13) submit();
+					else {
+						if ($(this).val()) $('button#submit').removeClass('btn-default').addClass('btn-success');
+						else $('button#submit').removeClass('btn-success').addClass('btn-default');
+					}
+				});
+				function submit() {
+					if (!$('button#submit').hasClass('btn-success')) return;
+					$('button#submit').removeClass('btn-success').addClass('btn-warning');
+					$.ajax({
+						'url': '/api/submit',
+						'type': 'POST',
+						'data': $('textarea#quote').val(),
+						'dataType': 'json',
+						'success': function(response) {
+							if (response.success) {
+								$('button#submit').removeClass('btn-warning').addClass('btn-success');
+								$('textarea#quote').val('');
+							}
+							else {
+								$('button#submit').removeClass('btn-warning').addClass('btn-danger');
+								setTimeout(function() {
+									$('button#submit').removeClass('btn-danger').addClass('btn-default');
+									$('textarea#quote').keyup()
+								}, 1000);
+							}
+						},
+						'error': function() {
+							$('button#submit').removeClass('btn-warning').addClass('btn-danger');
+							setTimeout(function() {
+								$('button#submit').removeClass('btn-danger').addClass('btn-default');
+								$('textarea#quote').keyup()
+							}, 1000);
+						}
+					});
+				}
+				$('button#submit').click(submit);
+				function subscribeError() {
+					$('button#subscribe').removeClass('btn-warning').addClass('btn-danger');
+					setTimeout(function() {
+						$('button#subscribe').removeClass('btn-danger').addClass('btn-default');
+					}, 1000);
+				}
+				function subscribe() {
+					if (!$('button#subscribe').hasClass('btn-info')) return;
+					$('button#subscribe').removeClass('btn-info').addClass('btn-warning');
+					$.ajax({
+						'url': '/api/subscribe',
+						'type': 'GET',
+						'data': {
+							'email': $('input#email').val()
+						},
+						'dataType': 'json',
+						'success': function(response) {
+							$('input#email').val('');
+							$('button#subscribe').removeClass('btn-warning');
+							if (response.success) {
+								$('button#subscribe').addClass('btn-success');
+								setTimeout(function() {
+									$('button#subscribe').removeClass('btn-success').addClass('btn-default');
+								}, 1000);
+							}
+							else {
+								alert(response.message);
+								subscribeError();
+							}
+						},
+						'error': subscribeError
+					})
+				}
+				$('input#email').keyup(function(e) {
+					if (e.which === 13) subscribe();
+					else {
+						setTimeout($.proxy(function() {
+							if ($(this).val().length) $('button#subscribe').removeClass('btn-default').addClass('btn-info');
+							else $('button#subscribe').removeClass('btn-info').addClass('btn-default');
+						}, this), 0);
+					}
+				});
+				$('button#subscribe').click(subscribe);
+			});
+		</script>
+	</head>
+	<body>
+		<div id = 'body'>
+			<div class = 'row'>
+				<div class = 'col-md-3'>
+					<div class = 'panel panel-default'>
+						<div class = 'panel-heading'>Submit</div>
+						<div class = 'panel-body'>
+							<textarea id = 'quote' class = 'form-control' placeholder = 'Quote' rows = 5></textarea>
+							<button id = 'submit' class = 'btn btn-default'>Submit</button>
+						</div>
+					</div>
+				</div>
+				<div class = 'col-md-3'>
+					<div class = 'panel panel-default'>
+						<div class = 'panel-heading'>Subscribe</div>
+						<div class = 'panel-body'>
+							<input id = 'email' class = 'form-control' type = 'email' placeholder = 'e-mail address' />
+							<button id = 'subscribe' class = 'btn btn-default'>Subscribe</button>
+						</div>
+					</div>
+				</div>
+				<div class = 'col-md-6'>
+					<div id = 'last-message' class = 'panel panel-default'>
+						<div class = 'panel-heading'>Last post</div>
+						<div class = 'panel-body'>Loading...</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

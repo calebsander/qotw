@@ -1,0 +1,140 @@
+/*all*/
+nav#mainnav {
+	position:fixed;
+	top:20px;
+	left:20px;
+	right:20px;
+	z-index:10;
+}
+div#body {
+	position:absolute;
+	top:100px;
+	left:20px;
+	right:20px;
+	bottom:0px;
+}
+ul.navbar-right {
+	position:relative;
+	right:10px;
+}
+div.x-center {
+	position:absolute;
+	left:50%;
+}
+div.y-center {
+	position:absolute;
+	top:50%;
+}
+div.panel.panel-default {
+	border-width:3px;
+	border-radius:10px;
+}
+div.panel-heading {
+	font-weight:bold;
+	border-top-left-radius:7px;
+	border-top-right-radius:7px;
+}
+button#submit, button#create-user {
+	position:relative;
+	top:10px;
+}
+
+/*archives*/
+table#archive-entries {
+	position:absolute;
+	top:0px;
+	left:0px;
+	right:0px;
+	bottom:0px;
+	overflow:auto;
+	margin-bottom:0px;
+}
+table#archive-entries>tbody>tr>td {
+	text-align:center;
+}
+td[id].hover {
+	color:#34495e;
+	-webkit-user-select:none;
+	-webkit-touch-callout:none;
+}
+td[id].hover-effect {
+	color:#2ecc71;
+}
+
+/*index*/
+button#subscribe {
+	position:relative;
+	top:5px;
+}
+
+/*viewmessage*/
+body.allow-overflow {
+	overflow:auto;
+}
+p#message-body {
+	position:absolute;
+	top:100px;
+	left:40px;
+	right:0px;
+	bottom:0px;
+}
+p#message-body, div#last-message>div.panel-body {
+	line-height:1.1;
+	font-family:monospace;
+	font-size:12;
+	color:black;
+}
+
+/*vote*/
+div#vote-row {
+	position:absolute;
+	top:0px;
+	left:0px;
+	right:0px;
+	bottom:0px;
+}
+table#votes {
+	margin-bottom:0px;
+}
+table#votes>thead>tr>th {
+	text-align:center;
+}
+
+/*admin*/
+input#username, input#password {
+	width:200px;
+}
+input#password {
+	position:relative;
+	top:5px;
+}
+
+/*tools*/
+div#admins>button, div#admins>ul>li>a {
+	font-size:20;
+}
+.center {
+	text-align:center;
+}
+div#admins>ul>li.divider {
+	background-color:rgba(202,206,209,.5)
+}
+div#admins>ul>li>a>span.glyphicon-remove {
+	padding-left:20px;
+	top:5px;
+}
+div.row.shift-down {
+	position:relative;
+	top:30px;
+}
+div.submission-date, div.vote-date {
+	font-weight:bold;
+}
+div#add-admin {
+	display:none;
+	position:absolute;
+	top:-105px;
+	left:-125px;
+	width:250px;
+	height:210px;
+}
