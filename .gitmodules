@@ -1,0 +1,3 @@
+[submodule "node-libraries"]
+	path = node-libraries
+	url = https://github.com/calebsander/node-libraries
