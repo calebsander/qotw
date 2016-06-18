@@ -59,7 +59,7 @@ http.createServer((req, res) => {
 	else {
 		let questionIndex = req.url.indexOf('?');
 		if (questionIndex !== -1) req.url = req.url.substring(0, questionIndex);
-		serv(res, req.url);
+		serv(res, req);
 	}
 }).listen(80);
 console.log('Ready');
