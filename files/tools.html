@@ -1,11 +1,7 @@
 <html>
 	<head>
-		<link href = '/Flat-UI/dist/css/vendor/bootstrap.min.css' rel = 'stylesheet' />
-		<link href = '/Flat-UI/dist/css/flat-ui.min.css' rel = 'stylesheet' />
-		<link href = '/css/stylesheet.css' rel = 'stylesheet' />
-		<script src = '/js/jquery.js'></script>
+		<STANDARD_INCLUDES />
 		<script src = '/Flat-UI/dist/js/flat-ui.min.js'></script>
-		<script src = '/js/common.js'></script>
 		<title>Admin Tools</title>
 		<script>
 			if (!(localStorage.sessionKey)) alert('Not signed in, click on "Admin"');
@@ -169,6 +165,7 @@
 		</script>
 	</head>
 	<body>
+		<STANDARD_NAVBAR />
 		<div id = 'body'>
 			<div class = 'btn-group' id = 'admins'>
 				<button class = 'btn btn-inverse dropdown-toggle' data-toggle = 'dropdown'>

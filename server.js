@@ -1,7 +1,8 @@
+const compile = require(__dirname + '/compile.js');
 const http = require('http');
 const redis = require('redis');
 const fileserver = require(__dirname + '/node-libraries/fileserver/fileserver.js');
-const serv = fileserver(__dirname + '/files', true);
+const serv = fileserver(compile.getCompiledDir(), true);
 const servStream = fileserver.servStream;
 const url = require('url');
 
@@ -62,4 +63,6 @@ http.createServer((req, res) => {
 		serv(res, req);
 	}
 }).listen(80);
+
+compile.compileAll();
 console.log('Ready');

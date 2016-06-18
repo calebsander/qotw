@@ -1,13 +1,3 @@
-$(document).ready(function() {
-	$.ajax({
-		'url': '/html/nav.html',
-		'dataType': 'text',
-		'success': function(server_response) {
-			$('body').prepend(server_response);
-		}
-	});
-});
-
 function addZero(number) {
 	if (number < 10) return '0' + String(number);
 	else return String(number);
