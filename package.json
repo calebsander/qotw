@@ -1,0 +1,24 @@
+{
+  "name": "qotw",
+  "version": "0.1.0",
+  "description": "A site to handle quote submissions and mailings",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/calebsander/qotw.git"
+  },
+  "author": "Caleb Sander",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/calebsander/qotw/issues"
+  },
+  "homepage": "https://github.com/calebsander/qotw#readme",
+  "dependencies": {
+    "aws-sdk": "2.x",
+    "redis": "2.x"
+  }
+}

@@ -1,2 +1,2 @@
-**/*.json
+api/*.json
 node_modules
