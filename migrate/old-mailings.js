@@ -65,12 +65,13 @@ function addToArchives(url) {
 						if (DATE_MATCH.test(text)) {
 							let time = new Date(text).getTime();
 							redisClient.zadd(constants.ARCHIVES, time, JSON.stringify({
-								'title': title,
+								'title': htmlEntities.decode(title),
 								'timestamp': time,
 								'body': htmlEntities.decode(fullBody)
 							}), (err) => {
 								if (err) throw err;
 							});
+							break;
 						}
 					}
 					redisClient.quit();

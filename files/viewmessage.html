@@ -14,7 +14,7 @@
 					'success': function(response) {
 						if (response.success) {
 							$('title').text(response.title);
-							$('p#message-body').html(response.body.replace(/\n/g, '<br />'));
+							$('p#message-body').text(response.body);
 						}
 						else alert(response.message);
 					}
@@ -24,6 +24,6 @@
 	</head>
 	<body class = 'allow-overflow'>
 		<STANDARD_NAVBAR />
-		<p id = 'message-body'></p>
+		<p class = 'quote-text' id = 'message-body'></p>
 	</body>
 </html>

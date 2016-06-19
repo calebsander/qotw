@@ -14,7 +14,7 @@
 					'dataType': 'json',
 					'success': function(response) {
 						$('div#message-title').text('Voting on "' + response.title + '"');
-						var paragraphs = response.body.split('\n\n');
+						var paragraphs = response.body.split(/\n{2,}/);
 						for (var i = 0, paragraph, id; i < paragraphs.length; i++) {
 							paragraph = paragraphs[i];
 							if (paragraphContainsQuote(paragraph)) {

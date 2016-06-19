@@ -52,7 +52,7 @@ table#archive-entries {
 	overflow:auto;
 	margin-bottom:0px;
 }
-table#archive-entries>tbody>tr>td {
+table#archive-entries th {
 	text-align:center;
 }
 td[id].hover {
