@@ -46,6 +46,7 @@ http.createServer((req, res) => {
 		else if (req.url === '/api/archives') archives(res);
 		else if (req.url === '/api/submit') readPostString(req, (quote) => submit(quote, res));
 		else if (req.url === '/api/vote') readPostString(req, (voteData) => vote(JSON.parse(voteData), res));
+		else if (req.url === '/admin/compose') readPostString(req, (composeData) => adminUsers.compose(JSON.parse(composeData), res));
 		else if (req.url.startsWith('/api/subscribe?email=')) subscribe(query.email, res);
 		else if (req.url.startsWith('/api/confirm?key=')) confirm(query.key, res);
 		else if (req.url.startsWith('/api/message?id=')) message(query.id, res);

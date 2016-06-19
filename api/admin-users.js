@@ -2,6 +2,7 @@ const constants = require(__dirname + '/constants.js');
 const crypto = require('crypto');
 const fs = require('fs');
 const generateKey = require(__dirname + '/generate-key.js');
+const sendEmail = require(__dirname + '/send-email.js');
 
 function hash(password) {
 	let sha2hash = crypto.createHash('sha256');
@@ -11,6 +12,13 @@ function hash(password) {
 const MASTER_LOGIN = JSON.parse(fs.readFileSync(__dirname + '/master-login.json'));
 const ONE_DAY = 86400000;
 const EXPIRE_TIME = ONE_DAY * 2;
+
+function ifErrThrowErr(err) {
+	if (err) throw err;
+}
+function htmlSafe(str) {
+	return str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 module.exports = (redisClient) => {
 	redisClient.hset(constants.ADMINS, MASTER_LOGIN.username, hash(MASTER_LOGIN.password), (err) => {
@@ -137,6 +145,46 @@ module.exports = (redisClient) => {
 						}
 					});
 				}
+			});
+		},
+		'compose': (data, res) => {
+			const keys = ['title', 'body', 'cutoffTime'];
+			for (let key in keys) {
+				key = keys[key];
+				if (!data[key]) {
+					res.end(JSON.stringify({'success': false, 'message': 'Missing ' + key}));
+					return;
+				}
+			}
+			respondIfUnexpired(data.key, res, () => {
+				let time = new Date().getTime();
+				let title = '[QOTW] ' + data.title;
+				redisClient.zadd(constants.ARCHIVES, time, JSON.stringify({
+					'title': title,
+					'timestamp': time,
+					'body': data.body
+				}), ifErrThrowErr);
+				let escapedBody = htmlSafe((data.body + '\n\n')).replace(/\n/g, '<br>');
+				let voteTokens = new Set();
+				redisClient.del(constants.VOTE_TOKENS, (err) => {
+					if (err) throw err;
+					else {
+						redisClient.smembers(constants.EMAILS, (err, members) => {
+							if (err) throw err;
+							else {
+								members.forEach((address) => {
+									let voteToken = generateKey((key) => voteTokens.has(key));
+									voteTokens.add(voteToken);
+									redisClient.sadd(constants.VOTE_TOKENS, voteToken, ifErrThrowErr);
+									sendEmail(address, title, escapedBody + '<a href="' + constants.DOMAIN + '/vote?token=' + voteToken + '">Vote here!</a>');
+								});
+							}
+						});
+						res.end(JSON.stringify({'success': true}));
+					}
+				});
+				redisClient.del(constants.CURRENT_VOTES, ifErrThrowErr);
+				redisClient.zremrangebyscore(constants.NEW_SUBMISSIONS, '-inf', data.cutoffTime, ifErrThrowErr);
 			});
 		}
 	};

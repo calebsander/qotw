@@ -128,25 +128,35 @@
 					if (!$(this).hasClass('btn-success')) return;
 					$(this).removeClass('btn-success').addClass('btn-warning');
 					var data = sessionData();
-					data.message = $('textarea#compose').val();
+					data.title = $('input#title').val();
+					data.body = $('textarea#compose').val();
+					data.cutoffTime = submissionsCutoff;
 					$.ajax({
 						'url': '/admin/compose',
 						'type': 'POST',
-						'data': data,
+						'data': JSON.stringify(data),
 						'dataType': 'json',
 						'success': function(response) {
-							if (response.success) $('button#submit').removeClass('btn-warning').addClass('btn-success');
-							else $('button#submit').removeClass('btn-warning').addClass('btn-danger');
+							if (response.success) {
+								$('button#submit').removeClass('btn-warning').addClass('btn-success');
+								$('input#title').val('');
+								$('textarea#compose').val('');
+							}
+							else {
+								alert(response.message);
+								submissionError();
+							}
 						},
-						'error': function() {
-							$('button#submit').removeClass('btn-warning').addClass('btn-danger');
-							setTimeout(function() {
-								$('button#submit').removeClass('btn-danger').addClass('btn-default');
-							}, 1000);
-						}
+						'error': submissionError
 					});
-					$('textarea#compose').val('');
 				});
+				function submissionError() {
+					$('button#submit').removeClass('btn-warning').addClass('btn-danger');
+					setTimeout(function() {
+						$('button#submit').removeClass('btn-danger');
+						$('textarea#compose').keyup();
+					}, 1000);
+				}
 				function createUser() {
 					var data = sessionData();
 					data.username = $('input#username').val();

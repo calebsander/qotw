@@ -22,7 +22,7 @@ module.exports = (address, subject, body) => {
 				}
 			}
 		}
-	}, (err, data) => {
+	}, (err) => {
 		if (err) throw err;
 		else console.log('Message sent');
 	});

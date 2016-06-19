@@ -3,8 +3,10 @@
 		<STANDARD_INCLUDES />
 		<title>Vote</title>
 		<script>
+			var QUOTE = /".+" +-/;
+			var MULTIPLE_QUOTES = /[A-Za-z\d\s]+:\s.+\n?/;
 			function paragraphContainsQuote(paragraph) {
-				return paragraph.indexOf('"') !== -1;
+				return QUOTE.test(paragraph) || MULTIPLE_QUOTES.test(paragraph);
 			}
 			$(document).ready(function() {
 				var voteTable = $('table#votes>tbody');
@@ -60,7 +62,7 @@
 								setTimeout(function() {
 									$('button#submit').removeClass('btn-danger').addClass('btn-default');
 								}, 1000);
-								alert(response.message)
+								alert(response.message + '\nMake sure you used the link from the most recent e-mail. Note that you can only vote once.');
 							}
 						},
 						'error': function() {
