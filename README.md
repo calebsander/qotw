@@ -8,7 +8,7 @@ Functionality:
 - Sending out mailings
 - Voting on quotes
 
-It uses Redis for all database needs and AWS SES to handle emailing. Most of the page rendering takes place client-side.
+It uses Redis for all database needs and AWS SES to handle emailing. Most of the page rendering takes place client-side. The server is currently using http but could be easily switched over to https. Make sure to do that in production because using http would leave you very vulnerable to MITM attacks.
 
 To run your own instance, you would need to:
 - Set the base URL of the server (e.g. `https://www.qotw.net`) in `api/domain.txt`
