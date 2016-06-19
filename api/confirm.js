@@ -2,9 +2,8 @@ const constants = require(__dirname + '/constants.js');
 
 module.exports = (redisClient) => {
 	function logSubscribers() {
-		redisClient.smembers(constants.EMAILS, (err, data) => {
+		redisClient.smembers(constants.EMAILS, (err, members) => {
 			if (err) throw err;
-			else console.log('Subscribers: ' + data.join(', '));
 		});
 	}
 	return (key, res) => {

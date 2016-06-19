@@ -1,5 +1,5 @@
 /*all*/
-nav#mainnav {
+nav#main-nav {
 	position:fixed;
 	top:20px;
 	left:20px;
@@ -13,9 +13,11 @@ div#body {
 	right:20px;
 	bottom:0px;
 }
-ul.navbar-right {
-	position:relative;
-	right:10px;
+@media (min-width: 768px) {
+	ul.navbar-right {
+		position:relative;
+		right:10px;
+	}
 }
 div.x-center {
 	position:absolute;
