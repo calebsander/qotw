@@ -55,12 +55,33 @@ module.exports = (redisClient) => {
 		'checkExpired': (sessionKey, res) => {
 			isUnexpired(sessionKey, (unexpired) => res.end(JSON.stringify({'unexpired': unexpired})));
 		},
+		'getSubmissions': (sessionKey, res) => {
+			let cutoffTime = new Date().getTime(); //if post is created, all submissions before this time should be deleted
+			isUnexpired(sessionKey, (unexpired) => {
+				if (unexpired) {
+					redisClient.zrange(constants.NEW_SUBMISSIONS, 0, -1, 'withscores', (err, submissions) => {
+						if (err) throw err;
+						else {
+							let submissionTimes = [];
+							for (let i = 0; i < submissions.length; i += 2) {
+								submissionTimes.push({'quote': submissions[i], 'date': Number(submissions[i + 1])});
+							}
+							res.end(JSON.stringify({'success': true, 'submissions': submissionTimes, 'cutoffTime': cutoffTime}));
+						}
+					});
+				}
+				else res.end(JSON.stringify({'success': false, 'message': 'Session expired'}));
+			});
+		},
 		'getVotes': (sessionKey, res) => {
 			isUnexpired(sessionKey, (unexpired) => {
 				if (unexpired) {
 					redisClient.hgetall(constants.CURRENT_VOTES, (err, votes) => {
 						if (err) throw err;
-						else res.end(JSON.stringify({'success': true, 'votes': votes}));
+						else {
+							for (let quote in votes) votes[quote] = Number(votes[quote]);
+							res.end(JSON.stringify({'success': true, 'votes': votes}));
+						}
 					});
 				}
 				else res.end(JSON.stringify({'success': false, 'message': 'Session expired'}));

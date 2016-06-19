@@ -43,6 +43,9 @@ button#submit, button#create-user {
 .quote-text {
 	white-space:pre-line;
 }
+.allow-overflow {
+	overflow:auto;
+}
 
 /*archives*/
 table#archive-entries {
@@ -73,9 +76,6 @@ button#subscribe {
 }
 
 /*viewmessage*/
-body.allow-overflow {
-	overflow:auto;
-}
 p#message-body {
 	position:absolute;
 	top:100px;
@@ -135,7 +135,7 @@ div.row.shift-down {
 	position:relative;
 	top:30px;
 }
-div.submission-date, div.vote-body {
+div.submission-body, div.vote-body {
 	font-weight:bold;
 }
 div#add-admin {
@@ -145,4 +145,7 @@ div#add-admin {
 	left:-125px;
 	width:250px;
 	height:210px;
+}
+ul#submissions, ul#votes {
+	font-size:14;
 }

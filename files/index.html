@@ -14,12 +14,9 @@
 			});
 			$(document).ready(function() {
 				lastMessage = $('div#last-message');
-				$('textarea#quote').keyup(function(e) {
-					if (e.which === 13) submit();
-					else {
-						if ($(this).val()) $('button#submit').removeClass('btn-default').addClass('btn-success');
-						else $('button#submit').removeClass('btn-success').addClass('btn-default');
-					}
+				$('textarea#quote').on('input', function() {
+					if ($(this).val()) $('button#submit').removeClass('btn-default').addClass('btn-success');
+					else $('button#submit').removeClass('btn-success').addClass('btn-default');
 				});
 				function submit() {
 					if (!$('button#submit').hasClass('btn-success')) return;

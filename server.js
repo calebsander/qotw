@@ -62,6 +62,10 @@ http.createServer((req, res) => {
 			let sessionKey = url.parse(req.url, true).query.key;
 			adminUsers.checkExpired(sessionKey, res);
 		}
+		else if (req.url.startsWith('/admin/submissions?key=')) {
+			let sessionKey = url.parse(req.url, true).query.key;
+			adminUsers.getSubmissions(sessionKey, res);
+		}
 		else if (req.url.startsWith('/admin/votes?key=')) {
 			let sessionKey = url.parse(req.url, true).query.key;
 			adminUsers.getVotes(sessionKey, res);

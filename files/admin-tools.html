@@ -62,16 +62,19 @@
 				'data': sessionData(),
 				'dataType': 'json',
 				'success': function(response) {
-					var submissions = $('ul#submissions');
-					for (var submission = 0; submission < response.submissions.length; submission++) {
-						submissions.append(
-							$('<li>').addClass('list-group-item').append(
-								$('<div>').addClass('submission-date').text(formatDate(new Date(response.submissions[submission].date)))
-							).append(
-								$('<div>').addClass('submission-body').text(response.submissions[submission].submission)
-							)
-						);
+					if (response.success) {
+						var submissions = $('ul#submissions');
+						response.submissions.forEach(function(submission) {
+							submissions.append(
+								$('<li>').addClass('list-group-item').append(
+									$('<div>').addClass('submission-date').text(formatDate(new Date(submission.date)))
+								).append(
+									$('<div>').addClass('submission-body').addClass('quote-text').text(submission.quote)
+								)
+							);
+						});
 					}
+					else alert(response.message);
 				}
 			});
 			$.ajax({
@@ -85,7 +88,7 @@
 						var votes = [];
 						for (var quote in response) votes.push({'quote': quote, 'count': response[quote]});
 						votes.sort(function(a, b) { //get in descending order of votes
-							return Number(b.count) - Number(a.count);
+							return b.count - a.count;
 						});
 						var votesList = $('ul#votes');
 						votes.forEach(function(vote) {
