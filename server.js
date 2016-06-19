@@ -62,9 +62,13 @@ http.createServer((req, res) => {
 			let sessionKey = url.parse(req.url, true).query.key;
 			adminUsers.checkExpired(sessionKey, res);
 		}
+		else if (req.url.startsWith('/admin/votes?key=')) {
+			let sessionKey = url.parse(req.url, true).query.key;
+			adminUsers.getVotes(sessionKey, res);
+		}
 		else {
 			let questionIndex = req.url.indexOf('?');
-			if (questionIndex !== -1) req.url = req.url.substring(0, questionIndex);
+			if (questionIndex !== -1) req.url = req.url.substring(0, questionIndex); //strip parameters off request when serving files
 			serv(res, req);
 		}
 	}

@@ -117,7 +117,7 @@ input#password {
 	top:5px;
 }
 
-/*tools*/
+/*admin tools*/
 div#admins>button, div#admins>ul>li>a {
 	font-size:20;
 }
@@ -135,7 +135,7 @@ div.row.shift-down {
 	position:relative;
 	top:30px;
 }
-div.submission-date, div.vote-date {
+div.submission-date, div.vote-body {
 	font-weight:bold;
 }
 div#add-admin {

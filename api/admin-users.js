@@ -21,6 +21,16 @@ module.exports = (redisClient) => {
 			callback(data === hash(password));
 		});
 	}
+	function isUnexpired(sessionKey, callback) {
+		if (sessionKey === undefined) {
+			callback(false);
+			return;
+		}
+		redisClient.hget(constants.SESSION_KEYS, sessionKey, (err, expiry) => {
+			if (err) throw err;
+			else callback(expiry && Number(expiry) > new Date().getTime() + ONE_DAY);
+		});
+	}
 	return {
 		'createSession': (username, password, res) => {
 			if (password) {
@@ -43,9 +53,17 @@ module.exports = (redisClient) => {
 			else res.end(JSON.stringify({'success': false, 'message': 'No password provided'}));
 		},
 		'checkExpired': (sessionKey, res) => {
-			redisClient.hget(constants.SESSION_KEYS, sessionKey, (err, expiry) => {
-				if (err) throw err;
-				else res.end(JSON.stringify({'unexpired': (expiry && expiry > new Date().getTime() + ONE_DAY)}));
+			isUnexpired(sessionKey, (unexpired) => res.end(JSON.stringify({'unexpired': unexpired})));
+		},
+		'getVotes': (sessionKey, res) => {
+			isUnexpired(sessionKey, (unexpired) => {
+				if (unexpired) {
+					redisClient.hgetall(constants.CURRENT_VOTES, (err, votes) => {
+						if (err) throw err;
+						else res.end(JSON.stringify({'success': true, 'votes': votes}));
+					});
+				}
+				else res.end(JSON.stringify({'success': false, 'message': 'Session expired'}));
 			});
 		}
 	};
