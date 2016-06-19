@@ -1,5 +1,7 @@
+const fs = require('fs');
+
 module.exports = {
-	DOMAIN: 'http://23.23.43.37',
+	DOMAIN: fs.readFileSync(__dirname + '/domain.txt'),
 	//Database names
 	EMAILS: 'emails',
 	KEYS: 'keys',
@@ -7,5 +9,7 @@ module.exports = {
 	USERS: 'users',
 	SESSION_KEYS: 'session-keys',
 	ARCHIVES: 'posts',
-	NEW_SUBMISSIONS: 'submissions-unused'
+	NEW_SUBMISSIONS: 'submissions-unused',
+	VOTE_TOKENS: 'vote-tokens',
+	CURRENT_VOTES: 'current-votes'
 };

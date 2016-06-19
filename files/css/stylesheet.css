@@ -4,7 +4,7 @@ nav#mainnav {
 	top:20px;
 	left:20px;
 	right:20px;
-	z-index:10;
+	z-index:100;
 }
 div#body {
 	position:absolute;
@@ -37,6 +37,9 @@ div.panel-heading {
 button#submit, button#create-user {
 	position:relative;
 	top:10px;
+}
+.quote-text {
+	white-space:pre-line;
 }
 
 /*archives*/
@@ -96,8 +99,11 @@ div#vote-row {
 table#votes {
 	margin-bottom:0px;
 }
-table#votes>thead>tr>th {
+table#votes>thead>tr>th, table#votes td.center {
 	text-align:center;
+}
+span.icon-checked, span.icon-unchecked {
+	z-index:10;
 }
 
 /*admin*/

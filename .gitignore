@@ -1,3 +1,4 @@
 api/*.json
+api/*.txt
 node_modules
 compiled-files*

@@ -1,13 +1,11 @@
 <html>
 	<head>
 		<STANDARD_INCLUDES />
+		<script src = '/Flat-UI/dist/js/flat-ui.min.js'></script>
 		<title>Vote</title>
 		<script>
-			function getIndexOfQuote(messageBody, quoteNumber) {
-				var searchString = '\n' + String(quoteNumber) + '. ';
-				var index = messageBody.indexOf(searchString);
-				if (index == -1) return index;
-				else return index + searchString.length;
+			function paragraphContainsQuote(paragraph) {
+				return paragraph.indexOf('"') !== -1;
 			}
 			$(document).ready(function() {
 				var voteTable = $('table#votes>tbody');
@@ -16,29 +14,31 @@
 					'dataType': 'json',
 					'success': function(response) {
 						$('div#message-title').text('Voting on "' + response.title + '"');
-						var quoteNumber = 1;
-						var index;
-						while ((index = getIndexOfQuote(response.body, quoteNumber++)) != -1) {
-							voteTable.append(
-								$('<tr>').addClass('quote').append(
-									$('<td>').text('Votes: ').append(
-										$('<input>').attr('type', 'number').attr('min', 0).attr('max', 3).val(0)
+						var paragraphs = response.body.split('\n\n');
+						for (var i = 0, paragraph, id; i < paragraphs.length; i++) {
+							paragraph = paragraphs[i];
+							if (paragraphContainsQuote(paragraph)) {
+								id = 'quote' + String(i);
+								voteTable.append(
+									$('<tr>').addClass('quote').append(
+										$('<td>').addClass('center').append(
+											$('<label>').addClass('radio').append(
+												$('<input>').attr('type', 'radio').attr('name', 'vote-radio').attr('data-toggle', 'radio')
+											)
+										)
+									).append(
+										$('<td>').addClass('quote-text').text(paragraph)
 									)
-								).append(
-									$('<td>').html(response.body.substring(index, response.body.indexOf('\n\n', index)).replace(/\n/g, '<br/>'))
-								)
-							);
+								);
+							}
 						}
+						$('input:radio').radiocheck();
 					}
 				});
 				function submit() {
-					var quoteVotes = [];
-					var quotes = voteTable.children();
-					for (var i = 0, times; i < quotes.length; i++) {
-						for (times = 0; times < Number(quotes.eq(i).children('td').eq(0).children('input').val()); times++) quoteVotes.push(i + 1);
-					}
-					if (quoteVotes.length > 3) {
-						alert('You can only submit 3 votes total.');
+					var selectedRadio = $('input:radio:checked').eq(0);
+					if (!selectedRadio.length) {
+						alert('No quote selected.');
 						return;
 					}
 					$('button#submit').removeClass('btn-success').addClass('btn-warning');
@@ -46,15 +46,23 @@
 						'url': '/api/vote',
 						'type': 'POST',
 						'data': JSON.stringify({
-							'quotes': quoteVotes,
+							'quote': selectedRadio.closest('tr').children('td.quote-text').text(),
 							'token': params.token
 						}),
 						'dataType': 'json',
 						'success': function(response) {
-							if (response.success) $('button#submit').removeClass('btn-warning').addClass('btn-success');
-							else $('button#submit').removeClass('btn-warning').addClass('btn-danger');
-							alert('Success!');
-							window.location.assign('/');
+							if (response.success) {
+								$('button#submit').removeClass('btn-warning').addClass('btn-success');
+								alert('Success!');
+								window.location.assign('/');
+							}
+							else {
+								$('button#submit').removeClass('btn-warning').addClass('btn-danger');
+								setTimeout(function() {
+									$('button#submit').removeClass('btn-danger').addClass('btn-default');
+								}, 1000);
+								alert(response.message)
+							}
 						},
 						'error': function() {
 							$('button#submit').removeClass('btn-warning').addClass('btn-danger');

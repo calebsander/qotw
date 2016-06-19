@@ -1,8 +1,9 @@
 const constants = require(__dirname + '/../api/constants.js');
 const https = require('https');
-const select = require('soupselect').select;
+const htmlEntities = require('he');
 const htmlParser = require('htmlparser');
 const redis = require('redis');
+const select = require('soupselect').select;
 
 function makeRequest(url, callback) {
 	https.get(url, (res) => {
@@ -61,12 +62,12 @@ function addToArchives(url) {
 					for (let italic in italics) {
 						italic = italics[italic];
 						let text = italic.children[0].raw;
-						if (DATE_MATCH.exec(text)) {
+						if (DATE_MATCH.test(text)) {
 							let time = new Date(text).getTime();
 							redisClient.zadd(constants.ARCHIVES, time, JSON.stringify({
 								'title': title,
 								'timestamp': time,
-								'body': fullBody
+								'body': htmlEntities.decode(fullBody)
 							}), (err) => {
 								if (err) throw err;
 							});

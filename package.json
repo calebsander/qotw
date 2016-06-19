@@ -19,6 +19,7 @@
   "homepage": "https://github.com/calebsander/qotw#readme",
   "dependencies": {
     "aws-sdk": "2.x",
+    "he": "*",
     "redis": "2.x",
     "htmlparser": "*",
     "soupselect": "*"
