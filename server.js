@@ -38,38 +38,24 @@ function readPostString(req, callback) {
 http.createServer((req, res) => {
 	console.log(formatDate() + ' Request to ' + req.url + ' from ' + req.connection.remoteAddress);
 	try {
+		let query = url.parse(req.url, true).query;
+		let sessionKey;
+		if (req.url.startsWith('/admin/')) sessionKey = query.key;
+
 		if (req.url === '/api/lastmessage') lastMessage(res);
 		else if (req.url === '/api/archives') archives(res);
 		else if (req.url === '/api/submit') readPostString(req, (quote) => submit(quote, res));
 		else if (req.url === '/api/vote') readPostString(req, (voteData) => vote(JSON.parse(voteData), res));
-		else if (req.url.startsWith('/api/subscribe?email=')) {
-			let email = url.parse(req.url, true).query.email;
-			subscribe(email, res);
-		}
-		else if (req.url.startsWith('/api/confirm?key=')) {
-			let key = url.parse(req.url, true).query.key;
-			confirm(key, res);
-		}
-		else if (req.url.startsWith('/api/message?id=')) {
-			let id = url.parse(req.url, true).query.id;
-			message(id, res);
-		}
-		else if (req.url.startsWith('/admin/login?username=')) {
-			let query = url.parse(req.url, true).query;
-			adminUsers.createSession(query.username, query.password, res);
-		}
-		else if (req.url.startsWith('/admin/checkkey?key=')) {
-			let sessionKey = url.parse(req.url, true).query.key;
-			adminUsers.checkExpired(sessionKey, res);
-		}
-		else if (req.url.startsWith('/admin/submissions?key=')) {
-			let sessionKey = url.parse(req.url, true).query.key;
-			adminUsers.getSubmissions(sessionKey, res);
-		}
-		else if (req.url.startsWith('/admin/votes?key=')) {
-			let sessionKey = url.parse(req.url, true).query.key;
-			adminUsers.getVotes(sessionKey, res);
-		}
+		else if (req.url.startsWith('/api/subscribe?email=')) subscribe(query.email, res);
+		else if (req.url.startsWith('/api/confirm?key=')) confirm(query.key, res);
+		else if (req.url.startsWith('/api/message?id=')) message(query.id, res);
+		else if (req.url.startsWith('/admin/login?')) adminUsers.createSession(query.username, query.password, res);
+		else if (req.url.startsWith('/admin/checkkey?key=')) adminUsers.checkExpired(sessionKey, res);
+		else if (req.url.startsWith('/admin/submissions?key=')) adminUsers.getSubmissions(sessionKey, res);
+		else if (req.url.startsWith('/admin/votes?key=')) adminUsers.getVotes(sessionKey, res);
+		else if (req.url.startsWith('/admin/admins?key=')) adminUsers.getAdmins(sessionKey, res);
+		else if (req.url.startsWith('/admin/addadmin?')) adminUsers.add(sessionKey, query.username, query.password, res);
+		else if (req.url.startsWith('/admin/rmadmin?')) adminUsers.remove(sessionKey, query.username, res);
 		else {
 			let questionIndex = req.url.indexOf('?');
 			if (questionIndex !== -1) req.url = req.url.substring(0, questionIndex); //strip parameters off request when serving files

@@ -36,7 +36,7 @@ div.panel-heading {
 	border-top-left-radius:7px;
 	border-top-right-radius:7px;
 }
-button#submit, button#create-user {
+button#submit, button#create-user, button#cancel {
 	position:relative;
 	top:10px;
 }
@@ -148,4 +148,10 @@ div#add-admin {
 }
 ul#submissions, ul#votes {
 	font-size:14;
+}
+span.glyphicon:hover {
+	color:#e67e22;
+}
+span.glyphicon:active {
+	color:#3498db;
 }

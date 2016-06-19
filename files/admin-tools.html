@@ -18,44 +18,57 @@
 					'data': sessionData(),
 					'dataType': 'json',
 					'success': function(response) {
-						var list = $('div#admins>ul');
-						for (var admin = 0; admin < response.admins.length; admin++) {
+						if (response.success) {
+							var list = $('div#admins>ul');
+							list.children().remove();
+							response.admins.forEach(function(admin) {
+								list.append(
+									$('<li>').append(
+										$('<a>').text(admin).append(
+											$('<span>').addClass('glyphicon').addClass('glyphicon-remove').click(removeAdmin)
+										)
+									)
+								);
+							});
+							if (response.admins.length) {
+								list.append(
+									$('<li>').addClass('divider')
+								);
+							}
 							list.append(
 								$('<li>').append(
-									$('<a>').text(response.admins[admin]).append(
-										$('<span>').addClass('glyphicon').addClass('glyphicon-remove').click(function() {
-											var data = sessionData();
-											data.name = $(this).parent().text();
-											$.ajax({
-												'url': '/admin/rmadmin',
-												'type': 'POST',
-												'data': data,
-												'dataType': 'json',
-												'success': function(response) {
-													if (response.success) $(this).parent().parent().remove();
-													else alert('Unable to remove');
-												}
-											});
-										})
+									$('<a>').addClass('center').append(
+										$('<span>').addClass('glyphicon').addClass('glyphicon-plus')
 									)
-								)
+								).click(function() {
+									$('div#add-admin').show();
+									$('input#username').focus()
+								})
 							);
+							adminsLoaded = true;
 						}
-						list.append(
-							$('<li>').addClass('divider')
-						).append(
-							$('<li>').append(
-								$('<a>').addClass('center').append(
-									$('<span>').addClass('glyphicon').addClass('glyphicon-plus').click(function() {
-										$('div#add-admin').show();
-									})
-								)
-							)
-						);
-						adminsLoaded = true;
+						else alert(response.message);
 					}
 				});
 			}
+			function removeAdmin() {
+				var data = sessionData();
+				data.username = $(this).parent().text();
+				if (confirm('Are you sure you want to delete ' + data.username + '?')) {
+					var user = $(this).parent().parent();
+					$.ajax({
+						'url': '/admin/rmadmin',
+						'type': 'GET',
+						'data': data,
+						'dataType': 'json',
+						'success': function(response) {
+							if (response.success) user.remove();
+							else alert(response.message);
+						}
+					});
+				}
+			}
+			var submissionsCutoff;
 			$.ajax({
 				'url': '/admin/submissions',
 				'type': 'GET',
@@ -73,6 +86,7 @@
 								)
 							);
 						});
+						submissionsCutoff = response.cutoffTime;
 					}
 					else alert(response.message);
 				}
@@ -139,7 +153,7 @@
 					data.password = $('input#password').val();
 					$.ajax({
 						'url': '/admin/addadmin',
-						'type': 'POST',
+						'type': 'GET',
 						'data': data,
 						'dataType': 'json',
 						'success': function(response) {
@@ -147,8 +161,13 @@
 								$('div#add-admin').hide();
 								clearInputs();
 								$('button#create-user').removeClass('btn-success');
+								adminsLoaded = false;
+								loadAdmins();
 							}
-							else creationError();
+							else {
+								alert(response.message);
+								creationError();
+							}
 						},
 						'error': creationError
 					});
@@ -158,11 +177,10 @@
 					$('input#password').val('');
 				}
 				function creationError() {
-					clearInputs();
 					$('button#create-user').removeClass('btn-success').addClass('btn-danger');
 					setTimeout(function() {
 						$('button#create-user').removeClass('btn-danger');
-					}, 2000);
+					}, 1000);
 				}
 				$('input').keyup(function(e) {
 					if ($(this).attr('id') === 'password' && e.which === 13) createUser();
@@ -172,6 +190,11 @@
 					}
 				});
 				$('button#create-user').click(createUser);
+				$('button#cancel').click(function() {
+					$('div#add-admin').hide();
+					$('button#create-user').removeClass('btn-success');
+					clearInputs();
+				});
 			});
 		</script>
 	</head>
@@ -206,6 +229,7 @@
 					<div class = 'panel panel-default'>
 						<div class = 'panel-heading'>Compose</div>
 						<div class = 'panel-body'>
+							<input id = 'title' class = 'form-control' placeholder = 'Title' />
 							<textarea id = 'compose' class = 'form-control' placeholder = 'Post' rows = 20></textarea>
 							<button id = 'submit' class = 'btn btn-default'>Submit</button>
 						</div>
@@ -220,6 +244,7 @@
 					<input id = 'username' class = 'form-control' placeholder = 'Username' />
 					<input id = 'password' class = 'form-control' placeholder = 'Password' />
 					<button id = 'create-user' class = 'btn btn-default'>Create</button>
+					<button id = 'cancel' class = 'btn btn-danger'>Cancel</button>
 				</div>
 			</div>
 		</div>
