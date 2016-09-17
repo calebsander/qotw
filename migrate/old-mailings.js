@@ -1,84 +1,68 @@
-const constants = require(__dirname + '/../api/constants.js');
-const https = require('https');
-const htmlEntities = require('he');
-const htmlParser = require('htmlparser');
-const redis = require('redis');
-const select = require('soupselect').select;
+const constants = require(__dirname + '/../api/constants.js')
+const https = require('https')
+const htmlEntities = require('he')
+const htmlSoup = require('html-soup')
+const redis = require('redis')
 
+function getFirstElement(set) {
+	for (const element of set) return element
+}
+function unescapeHTML(html) {
+	return htmlSoup.parse(html).text
+}
 function makeRequest(url, callback) {
-	https.get(url, (res) => {
-		var body = '';
-		res.on('data', (chunk) => body += chunk);
-		res.on('end', () => callback(body));
-	});
+	https.get(url, res => {
+		const chunks = []
+		res.on('data', chunk => chunks.push(chunk))
+		res.on('end', () => callback(Buffer.concat(chunks)))
+	})
 }
 const MAIN_LIST = 'https://lists.qotw.net/pipermail/quoteoftheweek/';
-makeRequest(MAIN_LIST, (body) => {
-	const handler = new htmlParser.DefaultHandler((err, dom) => {
-		if (err) throw err;
-		else {
-			const rows = select(dom, 'tr');
-			for (let i = 1; i < rows.length; i++) {
-				findMailings(MAIN_LIST + rows[i].children[1].children[3].attribs.href);
+makeRequest(MAIN_LIST, body => {
+	const dom = htmlSoup.parse(body)
+	const rows = htmlSoup.select(dom, 'tr')
+	for (const row of rows) {
+		const linksTd = row.children[1]
+		const dateLink = htmlSoup.select(linksTd, 'a:last-of-type')
+		if (!dateLink.size) continue
+		findMailings(MAIN_LIST + getFirstElement(dateLink).attributes.href)
+	}
+})
+function findMailings(url) {
+	makeRequest(url, body => {
+		const dom = htmlSoup.parse(body)
+		const links = htmlSoup.select(dom, 'a[href$=".html"]')
+		for (const link of links) addToArchives(url.substring(0, url.lastIndexOf('/') + 1) + link.attributes.href) //calculate relative link
+	})
+}
+const PRE = '<PRE>'
+const PRE_CLOSE = '</PRE>'
+const DATE_MATCH = /^[A-Z][a-z]{2} [A-Z][a-z]{2}  ?\d\d? \d\d:\d\d:\d\d E[DS]T \d\d\d\d$/
+function addToArchives(url) {
+	makeRequest(url, body => {
+		body = body.toString().replace(/&In-Reply-To/g, '&amp;In-Reply-To')
+		const dom = htmlSoup.parse(body)
+		const italics = htmlSoup.select(dom, 'i')
+		const title = getFirstElement(htmlSoup.select(dom, 'title')).children[0].text
+		const preIndex = body.indexOf(PRE)
+		const indexAfterPreTag = preIndex + PRE.length
+		if (preIndex === -1 || body.indexOf(PRE, indexAfterPreTag) !== -1) throw new Error('Wrong number of pres for ' + url)
+		const redisClient = redis.createClient()
+		const fullBody = unescapeHTML(body.substring(indexAfterPreTag, body.indexOf(PRE_CLOSE, indexAfterPreTag)).trim())
+		for (const italic of italics) {
+			if (!italic.children.length) continue
+			const {text} = italic.children[0]
+			if (DATE_MATCH.test(text)) {
+				const time = new Date(text).getTime()
+				redisClient.zadd(constants.ARCHIVES, time, JSON.stringify({
+					title,
+					timestamp: time,
+					body: fullBody
+				}), err => {
+					if (err) throw err
+				})
 			}
 		}
-	});
-	const parser = new htmlParser.Parser(handler);
-	parser.parseComplete(body.replace(/\<A/g, '<a').replace(/  /g, '').replace(/\n/g, ''));
-});
-function findMailings(url) {
-	makeRequest(url, (body) => {
-		const handler = new htmlParser.DefaultHandler((err, dom) => {
-			if (err) throw err;
-			else {
-				const links = select(dom, 'a');
-				for (let link in links) {
-					link = links[link];
-					if (link.attribs.HREF && link.attribs.HREF.indexOf('http://') === -1) {
-						addToArchives(url.substring(0, url.lastIndexOf('/') + 1) + link.attribs.HREF);
-					}
-				}
-			}
-		});
-		const parser = new htmlParser.Parser(handler);
-		parser.parseComplete(body.replace(/  /g, '').replace(/\n/g, '').replace(/<A/g, '<a').replace(/\/A>/g, '/a>'));
-	});
-}
-const PRE = '<PRE>';
-const PRE_CLOSE = '</PRE>';
-const DATE_MATCH = /^[A-Z][a-z]{2} [A-Z][a-z]{2}  ?\d\d? \d\d:\d\d:\d\d E[DS]T \d\d\d\d$/;
-function addToArchives(url) {
-	makeRequest(url, (body) => {
-		const handler = new htmlParser.DefaultHandler((err, dom) => {
-			if (err) throw err;
-			else {
-				const italics = select(dom, 'i');
-				const title = select(dom, 'title')[0].children[0].raw.trim();
-				const preIndex = body.indexOf(PRE);
-				if (preIndex === -1 || body.indexOf(PRE, preIndex + 1) !== -1) console.log('Wrong number of pres for ' + url);
-				else {
-					const redisClient = redis.createClient();
-					const fullBody = body.substring(preIndex + PRE.length, body.indexOf(PRE_CLOSE));
-					for (let italic in italics) {
-						italic = italics[italic];
-						let text = italic.children[0].raw;
-						if (DATE_MATCH.test(text)) {
-							let time = new Date(text).getTime();
-							redisClient.zadd(constants.ARCHIVES, time, JSON.stringify({
-								'title': htmlEntities.decode(title),
-								'timestamp': time,
-								'body': htmlEntities.decode(fullBody)
-							}), (err) => {
-								if (err) throw err;
-							});
-							break;
-						}
-					}
-					redisClient.quit();
-				}
-			}
-		});
-		const parser = new htmlParser.Parser(handler);
-		parser.parseComplete(body.replace(/<I>/g, '<i>').replace(/<\/I>/g, '</i').replace(/<PRE>/g, '<pre>').replace(/<\/PRE>/g, '</pre>').replace(/<TITLE>/g, '<title>').replace(/<\/TITLE>/g, '</title>'));
-	});
+		redisClient.quit()
+	})
 }
