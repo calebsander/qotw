@@ -16,6 +16,8 @@ To run your own instance, you would need to:
 - Set the key `user` in `api/email-auth.json` to an e-mail address you control
 - Give your SES permission to send e-mails as that e-mail account
 - Set the keys `username` and `password` in `api/master-login.json`
+- Setup Redis so that the server is running in the background on port `6379` (see [this article](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-redis) for Ubuntu)
+- Change Redis config (`redis.conf`) so that `appendonly no` is replaced by `appendonly yes` (so that database is saved after each write) and restart the Redis server
 - Install NodeJS
-- `$ npm install`
-- `$ sudo nodejs server.js`
+- `$ npm i`
+- `$ sudo node server.js`
