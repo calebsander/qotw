@@ -14,7 +14,7 @@
 					'success': function(response) {
 						if (response.success) {
 							$('title').text(response.title);
-							$('p#message-body').text(response.body);
+							$('p#message-body').html(response.body);
 						}
 						else alert(response.message);
 					}

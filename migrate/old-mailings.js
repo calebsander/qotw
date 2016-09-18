@@ -1,14 +1,10 @@
 const constants = require(__dirname + '/../api/constants.js')
 const https = require('https')
-const htmlEntities = require('he')
 const htmlSoup = require('html-soup')
 const redis = require('redis')
 
 function getFirstElement(set) {
 	for (const element of set) return element
-}
-function unescapeHTML(html) {
-	return htmlSoup.parse(html).text
 }
 function makeRequest(url, callback) {
 	https.get(url, res => {
@@ -48,7 +44,7 @@ function addToArchives(url) {
 		const indexAfterPreTag = preIndex + PRE.length
 		if (preIndex === -1 || body.indexOf(PRE, indexAfterPreTag) !== -1) throw new Error('Wrong number of pres for ' + url)
 		const redisClient = redis.createClient()
-		const fullBody = unescapeHTML(body.substring(indexAfterPreTag, body.indexOf(PRE_CLOSE, indexAfterPreTag)).trim())
+		const fullBody = body.substring(indexAfterPreTag, body.indexOf(PRE_CLOSE, indexAfterPreTag)).trim()
 		for (const italic of italics) {
 			if (!italic.children.length) continue
 			const {text} = italic.children[0]

@@ -9,7 +9,7 @@
 				'dataType': 'json',
 				'success': function(response) {
 					lastMessage.children('div.panel-heading').text(response.title + ' (' + formatDate(new Date(response.timestamp), true) + ')');
-					lastMessage.children('div.panel-body').text(response.body);
+					lastMessage.children('div.panel-body').html(response.body);
 				}
 			});
 			$(document).ready(function() {
