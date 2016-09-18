@@ -112,6 +112,7 @@ module.exports = redisClient => {
 						redisClient.hset(constants.ADMINS, username, hash(password), err => {
 							if (err) throw err
 							res.end(JSON.stringify({success: true}))
+							console.log('Added admin: ' + username)
 						})
 					}
 				})
@@ -127,7 +128,10 @@ module.exports = redisClient => {
 				else {
 					redisClient.hdel(constants.ADMINS, username, (err, deleted) => {
 						if (err) throw err
-						if (deleted) res.end(JSON.stringify({success: true}))
+						if (deleted) {
+							res.end(JSON.stringify({success: true}))
+							console.log('Deleted admin: ' + username)
+						}
 						else res.end(JSON.stringify({success: false, message: 'No such user exists'}))
 					})
 				}
@@ -141,9 +145,9 @@ module.exports = redisClient => {
 				}
 			}
 			respondIfUnexpired(data.key, res, () => {
-				let time = new Date().getTime()
-				let title = '[QOTW] ' + data.title
-				let escapedBody = htmlSafe((data.body + '\n\n')).replace(/\n/g, '<br>')
+				const time = new Date().getTime()
+				const title = '[QOTW] ' + data.title
+				const escapedBody = htmlSafe((data.body + '\n\n')).replace(/\n/g, '<br>')
 				redisClient.zadd(constants.ARCHIVES, time, JSON.stringify({
 					title,
 					timestamp: time,
@@ -162,6 +166,7 @@ module.exports = redisClient => {
 						}
 					})
 					res.end(JSON.stringify({success: true}))
+					console.log('Created post: ' + title)
 				})
 				redisClient.del(constants.CURRENT_VOTES, ifErrThrowErr)
 				redisClient.zremrangebyscore(constants.NEW_SUBMISSIONS, '-inf', data.cutoffTime, ifErrThrowErr)

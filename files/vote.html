@@ -4,7 +4,7 @@
 		<title>Vote</title>
 		<script>
 			var QUOTE = /".+"\s+-/;
-			var MULTIPLE_QUOTES = /[A-Za-z\d\s]+:\s.+\n?/;
+			var MULTIPLE_QUOTES = /[^:\n]+:\s.+\n?/;
 			function paragraphContainsQuote(paragraph) {
 				return QUOTE.test(paragraph) || MULTIPLE_QUOTES.test(paragraph);
 			}
@@ -39,7 +39,7 @@
 				function submit() {
 					var selectedRadio = $('input:radio:checked').eq(0);
 					if (!selectedRadio.length) {
-						alert('No quote selected.');
+						alert('No quote selected');
 						return;
 					}
 					$('button#submit').removeClass('btn-success').addClass('btn-warning');
@@ -47,7 +47,7 @@
 						'url': '/api/vote',
 						'type': 'POST',
 						'data': JSON.stringify({
-							'quote': selectedRadio.closest('tr').children('td.quote-text').text(),
+							'quote': selectedRadio.closest('tr').children('td.quote-text').html().replace(/<br>/g, '\n').trim(),
 							'token': params.token
 						}),
 						'dataType': 'json',
