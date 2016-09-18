@@ -3,7 +3,7 @@
 		<STANDARD_INCLUDES />
 		<title>Vote</title>
 		<script>
-			var QUOTE = /".+" +-/;
+			var QUOTE = /".+"\s+-/;
 			var MULTIPLE_QUOTES = /[A-Za-z\d\s]+:\s.+\n?/;
 			function paragraphContainsQuote(paragraph) {
 				return QUOTE.test(paragraph) || MULTIPLE_QUOTES.test(paragraph);
@@ -15,7 +15,7 @@
 					'dataType': 'json',
 					'success': function(response) {
 						$('div#message-title').text('Voting on "' + response.title + '"');
-						var paragraphs = response.body.split(/\n{2,}/);
+						var paragraphs = response.body.split(/(?:<br>){2,}/);
 						for (var i = 0, paragraph, id; i < paragraphs.length; i++) {
 							paragraph = paragraphs[i];
 							if (paragraphContainsQuote(paragraph)) {
@@ -28,7 +28,7 @@
 											)
 										)
 									).append(
-										$('<td>').addClass('quote-text').text(paragraph)
+										$('<td>').addClass('quote-text').html(paragraph)
 									)
 								);
 							}

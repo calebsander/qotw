@@ -3,7 +3,7 @@
 		<STANDARD_INCLUDES />
 		<title>Admin Tools</title>
 		<script>
-			if (!(localStorage.sessionKey)) alert('Not signed in, click on "Admin"');
+			if (!localStorage.sessionKey) alert('Not signed in, click on "Admin"');
 			function sessionData() {
 				return {
 					'key': localStorage.sessionKey
