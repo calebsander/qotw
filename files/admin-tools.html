@@ -158,9 +158,15 @@
 					}, 1000);
 				}
 				function createUser() {
+					var password = $('input#password').val();
+					var confirmPassword = $('input#confirm-password').val();
+					if (password !== confirmPassword) {
+						alert("Passwords don't match");
+						return;
+					}
 					var data = sessionData();
 					data.username = $('input#username').val();
-					data.password = $('input#password').val();
+					data.password = password;
 					$.ajax({
 						'url': '/admin/addadmin',
 						'type': 'GET',
@@ -193,7 +199,7 @@
 					}, 1000);
 				}
 				$('input').keyup(function(e) {
-					if ($(this).attr('id') === 'password' && e.which === 13) createUser();
+					if ($(this).attr('id') === 'confirm-password' && e.which === 13) createUser();
 					else {
 						if ($('input#username').val() && $('input#password').val()) $('button#create-user').addClass('btn-success');
 						else $('button#create-user').removeClass('btn-success');
@@ -252,7 +258,8 @@
 				<div class = 'panel-heading'>Add Admin</div>
 				<div class = 'panel-body'>
 					<input id = 'username' class = 'form-control' placeholder = 'Username' />
-					<input id = 'password' class = 'form-control' placeholder = 'Password' />
+					<input type = 'password' id = 'password' class = 'form-control' placeholder = 'Password' />
+					<input type = 'password' id = 'confirm-password' class = 'form-control' placeholder = 'Confirm password' />
 					<button id = 'create-user' class = 'btn btn-default'>Create</button>
 					<button id = 'cancel' class = 'btn btn-danger'>Cancel</button>
 				</div>

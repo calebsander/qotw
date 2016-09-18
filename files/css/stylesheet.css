@@ -11,7 +11,7 @@ div#body {
 	top:100px;
 	left:20px;
 	right:20px;
-	bottom:0px;
+	bottom:0;
 }
 @media (min-width: 768px) {
 	ul.navbar-right {
@@ -36,7 +36,7 @@ div.panel-heading {
 	border-top-left-radius:7px;
 	border-top-right-radius:7px;
 }
-button#submit, button#create-user, button#cancel {
+button#submit {
 	position:relative;
 	top:10px;
 }
@@ -50,12 +50,12 @@ button#submit, button#create-user, button#cancel {
 /*archives*/
 table#archive-entries {
 	position:absolute;
-	top:0px;
-	left:0px;
-	right:0px;
-	bottom:0px;
+	top:0;
+	left:0;
+	right:0;
+	bottom:0;
 	overflow:auto;
-	margin-bottom:0px;
+	margin-bottom:0;
 }
 table#archive-entries th {
 	text-align:center;
@@ -80,8 +80,8 @@ p#message-body {
 	position:absolute;
 	top:100px;
 	left:40px;
-	right:0px;
-	bottom:0px;
+	right:0;
+	bottom:0;
 }
 p#message-body, div#last-message>div.panel-body {
 	line-height:1.1;
@@ -93,13 +93,13 @@ p#message-body, div#last-message>div.panel-body {
 /*vote*/
 div#vote-row {
 	position:absolute;
-	top:0px;
-	left:0px;
-	right:0px;
-	bottom:0px;
+	top:0;
+	left:0;
+	right:0;
+	bottom:0;
 }
 table#votes {
-	margin-bottom:0px;
+	margin-bottom:0;
 }
 table#votes>thead>tr>th, table#votes td.center {
 	text-align:center;
@@ -108,16 +108,21 @@ span.icon-checked, span.icon-unchecked {
 	z-index:10;
 }
 
-/*admin*/
-input#username, input#password {
+/*admin, admin-tools*/
+input#username, input#password, input#confirm-password {
+	position:relative;
 	width:200px;
 }
 input#password {
-	position:relative;
 	top:5px;
 }
-
-/*admin tools*/
+input#confirm-password {
+	top:10px;
+}
+button#create-user, button#cancel {
+	position:relative;
+	top:15px;
+}
 div#admins>button, div#admins>ul>li>a {
 	font-size:20;
 }
@@ -144,7 +149,7 @@ div#add-admin {
 	top:-105px;
 	left:-125px;
 	width:250px;
-	height:210px;
+	height:265px;
 }
 ul#submissions, ul#votes {
 	font-size:14;
