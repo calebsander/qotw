@@ -7,37 +7,24 @@
 				'url': '/api/archives',
 				'dataType': 'json',
 				'success': function(response) {
-					var table = $('table#archive-entries>tbody');
+					var table = $('table#archive-entries>tbody')
 					for (var message = 0; message < response.messages.length; message++) {
 						table.append(
 							$('<tr>').append(
 								$('<td>').text(formatDate(new Date(response.messages[message].timestamp)))
 							).append(
-								$('<td>').addClass('hover').append(
+								$('<td>').append(
 									$('<a>').attr('href', '/viewmessage?id=' + response.messages[message].messageID).text(response.messages[message].title)
 								)
 							)
-						);
+						)
 					}
-					$('td.hover').bind('touchstart mouseover', function(e) {
-						e.preventDefault();
-						$(this).addClass('hover-effect');
-					}).bind('touchend', function(e) {
-						e.preventDefault();
-						$(this).removeClass('hover-effect');
-						openMessage();
-					}).bind('mouseout', function() {
-						$(this).removeClass('hover-effect');
-					});
 				}
-			});
+			})
 		</script>
 		<style>
 			a {
-				color:#34495e
-			}
-			td.hover-effect>a {
-				color:#1abc9c;
+				color:#3498db;
 			}
 		</style>
 	</head>
