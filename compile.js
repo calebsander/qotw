@@ -1,3 +1,5 @@
+const CleanCSS = require('clean-css');
+const closure = require('google-closure-compiler-js').compile;
 const fs = require('fs');
 
 let COMPILED_DIR;
@@ -10,13 +12,13 @@ function transformPath(path) {
   return COMPILED_DIR + path.substring(ROOT_DIR.length);
 }
 function omitWhiteSpace(string) {
-  return string.replace(/\t/g, '');
+  return string.replace(/\t/g, '').replace(/\n{2,}/g, '\n');
 }
 const cachedStandardFiles = {};
 function getStandardFile(name) {
   if (name in cachedStandardFiles) return cachedStandardFiles[name];
   else {
-    let path = __dirname + '/standard/' + name.toLowerCase() + '.html';
+    const path = __dirname + '/standard/' + name.toLowerCase() + '.html';
     return cachedStandardFiles[name] = omitWhiteSpace(fs.readFileSync(path).toString());
   }
 }
@@ -41,13 +43,35 @@ function getResource(url, file) {
     }
   }
 }
-function compile(file, callback, omitReplacement) {
+function uglifyScript(script) {
+  return (
+    '!function(){' +
+    closure({
+      assumeFunctionWrapper: true,
+      jsCode: [{src: script}],
+      rewritePolyfills: true
+    }).compiledCode +
+    '}()'
+  );
+}
+function compile(file, callback, omitReplacement, test) {
   console.error('Compiling ' + file);
   if (file.endsWith('.html') && !omitReplacement) {
     fs.readFile(file, (err, data) => {
       if (err) throw err;
       else {
-        data = data.toString().replace(/\t/g, '');
+        data = omitWhiteSpace(data.toString());
+        if (!test) {
+          const INLINE_SCRIPT = '<script>', INLINE_SCRIPT_END = '</script>';
+          let startIndex = 0, nextIndex;
+          while ((nextIndex = data.indexOf(INLINE_SCRIPT, startIndex)) !== -1) {
+            const scriptStart = nextIndex + INLINE_SCRIPT.length;
+            const endIndex = data.indexOf(INLINE_SCRIPT_END, scriptStart);
+            const result = uglifyScript(data.substring(scriptStart, endIndex));
+            data = data.substring(0, scriptStart) + result + data.substring(endIndex);
+            startIndex = scriptStart + result.length + INLINE_SCRIPT_END.length;
+          }
+        }
         const STANDARD_MATCH = /<STANDARD_([A-Z]*) \/>/g;
         let match;
         while (match = STANDARD_MATCH.exec(data)) {
@@ -56,21 +80,34 @@ function compile(file, callback, omitReplacement) {
         }
         const SCRIPT_MATCH = /<script src = '(.+\.js)'><\/script>/g;
         while (match = SCRIPT_MATCH.exec(data)) {
-          let resultFileName = match[1];
+          const resultFileName = match[1];
           if (resultFileName.indexOf('://') === -1) {
-            let replaceRequest = match[0], resultFile = getResource(resultFileName, file), index = match.index;
+            const replaceRequest = match[0], resultFile = getResource(resultFileName, file), index = match.index;
             data = data.substring(0, index) + '<script>' + resultFile + '</script>' + data.substring(index + replaceRequest.length);
           }
         }
         const STYLE_MATCH = /<link href = '(.+\.css)' rel = 'stylesheet' \/>/g;
         while (match = STYLE_MATCH.exec(data)) {
-          let resultFileName = match[1];
+          const resultFileName = match[1];
           if (resultFileName.indexOf('://') === -1) {
-            let replaceRequest = match[0], resultFile = getResource(resultFileName, file), index = match.index;
+            const replaceRequest = match[0], resultFile = getResource(resultFileName, file), index = match.index;
             data = data.substring(0, index) + '<style>' + resultFile + '</style>' + data.substring(index + replaceRequest.length);
           }
         }
-        fs.writeFile(transformPath(file), data, (err) => {
+        if (!test) {
+          const INLINE_STYLE = '<style>', INLINE_STYLE_END = '</style>';
+          startIndex = 0;
+          while ((nextIndex = data.indexOf(INLINE_STYLE, startIndex)) !== -1) {
+            const styleStart = nextIndex + INLINE_STYLE.length;
+            const endIndex = data.indexOf(INLINE_STYLE_END, styleStart);
+            const result = new CleanCSS({
+              'keepSpecialComments': 0
+            }).minify(data.substring(styleStart, endIndex)).styles;
+            data = data.substring(0, styleStart) + result + data.substring(endIndex);
+            startIndex = styleStart + result.length + INLINE_STYLE_END.length;
+          }
+        }
+        fs.writeFile(transformPath(file), data, err => {
           if (err) throw err;
           else {
             if (callback) callback();
@@ -86,19 +123,19 @@ function compile(file, callback, omitReplacement) {
   }
 }
 
-const UNCOMPILED_FOLDERS = [];
-const OMIT_FOLDERS = [];
-[UNCOMPILED_FOLDERS, OMIT_FOLDERS].forEach((folders) => {
+const UNCOMPILED_FOLDERS = ['uploads', 'gl'];
+const OMIT_FOLDERS = ['nbt/.git', 'uploads/data'];
+[UNCOMPILED_FOLDERS, OMIT_FOLDERS].forEach(folders => {
   for (let i = 0; i < folders.length; i++) folders[i] = ROOT_DIR + '/' + folders[i];
 });
-function walkDir(dir, omitReplacement) {
-  fs.mkdir(transformPath(dir), (err) => {
+function walkDir(dir, omitReplacement, test) {
+  fs.mkdir(transformPath(dir), err => {
     if (err) throw err;
     else {
       fs.readdir(dir, (err, files) => {
         if (err) throw err;
         else {
-          files.forEach((file) => {
+          files.forEach(file => {
             file = dir + '/' + file;
             fs.stat(file, (err, stats) => {
               if (err) throw err;
@@ -106,7 +143,7 @@ function walkDir(dir, omitReplacement) {
                 if (stats.isDirectory()) {
                   if (OMIT_FOLDERS.indexOf(file) === -1) walkDir(file, omitReplacement || UNCOMPILED_FOLDERS.indexOf(file) !== -1);
                 }
-                else compile(file, undefined, omitReplacement);
+                else compile(file, undefined, omitReplacement, test);
               }
             });
           });
@@ -119,7 +156,7 @@ function walkDir(dir, omitReplacement) {
 function rmDirRecursive(path) {
   var files = [];
   files = fs.readdirSync(path);
-  files.forEach((file, index) => {
+  files.forEach(file => {
     var curPath = path + '/' + file;
     if (fs.lstatSync(curPath).isDirectory()) rmDirRecursive(curPath);
     else fs.unlinkSync(curPath);
@@ -131,10 +168,10 @@ module.exports = compile;
 module.exports.setCompiledDir = setCompiledDir;
 module.exports.getCompiledDir = () => COMPILED_DIR;
 module.exports.walkDir = walkDir;
-module.exports.compileAll = () => {
+module.exports.compileAll = test => {
   if (fs.existsSync(COMPILED_DIR)) rmDirRecursive(COMPILED_DIR);
-  walkDir(ROOT_DIR);
+  walkDir(ROOT_DIR, false, test);
 };
-module.exports.remove = (file) => {
-  fs.unlink(transformPath(file), (err) => {});
+module.exports.remove = file => {
+  fs.unlink(transformPath(file), err => {});
 };

@@ -19,7 +19,9 @@
   "homepage": "https://github.com/calebsander/qotw#readme",
   "dependencies": {
     "aws-sdk": "2.6.x",
-    "redis": "2.6.x",
-    "html-soup": "1.1.x"
+    "clean-css": "3.4.x",
+    "google-closure-compiler-js": "20160916.0.0",
+    "html-soup": "1.1.x",
+    "redis": "2.6.x"
   }
 }
