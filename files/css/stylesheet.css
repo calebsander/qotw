@@ -98,11 +98,18 @@ div#vote-row {
 table#votes {
 	margin-bottom:0;
 }
-table#votes>thead>tr>th, table#votes td.center {
+table#votes th, table#votes td.center {
 	text-align:center;
 }
 span.icon-checked, span.icon-unchecked {
 	z-index:10;
+}
+tr.selected>td {
+	background:#f1c40f !important;
+}
+p.quote-text {
+	margin:0;
+	padding:0;
 }
 
 /*admin, admin-tools*/

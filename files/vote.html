@@ -3,78 +3,66 @@
 		<STANDARD_INCLUDES />
 		<title>Vote</title>
 		<script>
-			var QUOTE = /".+"\s+-/;
-			var MULTIPLE_QUOTES = /[^:\n]+:\s.+\n?/;
-			function paragraphContainsQuote(paragraph) {
-				return QUOTE.test(paragraph) || MULTIPLE_QUOTES.test(paragraph);
+			var SELECTED = 'selected'
+			function select() {
+				$('tr.' + SELECTED).removeClass(SELECTED)
+				$(this).addClass(SELECTED)
+				$('button#submit').addClass('btn-success')
 			}
 			$(document).ready(function() {
-				var voteTable = $('table#votes>tbody');
+				var voteTable = $('table#votes>tbody')
 				$.ajax({
-					'url': '/api/lastmessage',
+					'url': '/api/paragraphs',
 					'dataType': 'json',
 					'success': function(response) {
-						$('div#message-title').text('Voting on "' + response.title + '"');
-						var paragraphs = response.body.split(/(?:<br>){2,}/);
-						for (var i = 0, paragraph, id; i < paragraphs.length; i++) {
-							paragraph = paragraphs[i];
-							if (paragraphContainsQuote(paragraph)) {
-								id = 'quote' + String(i);
-								voteTable.append(
-									$('<tr>').addClass('quote').append(
-										$('<td>').addClass('center').append(
-											$('<label>').addClass('radio').append(
-												$('<input>').attr('type', 'radio').attr('name', 'vote-radio').attr('data-toggle', 'radio')
-											)
-										)
-									).append(
-										$('<td>').addClass('quote-text').html(paragraph)
+						response.forEach(function(paragraph) {
+							voteTable.append(
+								$('<tr>').click(select).append(
+									$('<td>').append(
+										$('<p>').addClass('quote-text').html(paragraph)
 									)
-								);
-							}
-						}
-						$('input:radio').radiocheck();
+								)
+							)
+						})
 					}
-				});
+				})
 				function submit() {
-					var selectedRadio = $('input:radio:checked').eq(0);
-					if (!selectedRadio.length) {
-						alert('No quote selected');
-						return;
+					var selectedQuote = $('tr.selected')
+					if (!selectedQuote.length) {
+						alert('No quote selected')
+						return
 					}
-					$('button#submit').removeClass('btn-success').addClass('btn-warning');
+					$('button#submit').removeClass('btn-success').addClass('btn-warning')
 					$.ajax({
 						'url': '/api/vote',
 						'type': 'POST',
 						'data': JSON.stringify({
-							'quote': selectedRadio.closest('tr').children('td.quote-text').html().replace(/<br>/g, '\n').trim(),
+							'index': $('table#votes tr').index(selectedQuote) - 1,
 							'token': params.token
 						}),
 						'dataType': 'json',
 						'success': function(response) {
 							if (response.success) {
-								$('button#submit').removeClass('btn-warning').addClass('btn-success');
-								alert('Success!');
-								window.location.assign('/');
+								$('button#submit').removeClass('btn-warning').addClass('btn-success')
+								alert('Success!')
+								location = '/'
 							}
 							else {
-								$('button#submit').removeClass('btn-warning').addClass('btn-danger');
-								setTimeout(function() {
-									$('button#submit').removeClass('btn-danger').addClass('btn-default');
-								}, 1000);
-								alert(response.message + '\nMake sure you used the link from the most recent e-mail. Note that you can only vote once.');
+								submitError()
+								alert(response.message + '\nMake sure you used the link from the most recent e-mail. Note that you can only vote once.')
 							}
 						},
-						'error': function() {
-							$('button#submit').removeClass('btn-warning').addClass('btn-danger');
-							setTimeout(function() {
-								$('button#submit').removeClass('btn-danger').addClass('btn-default');
-							}, 1000);
-						}
-					});
+						'error': submitError
+					})
 				}
-				$('button#submit').click(submit);
-			});
+				function submitError() {
+					$('button#submit').removeClass('btn-warning').addClass('btn-danger')
+					setTimeout(function() {
+						$('button#submit').removeClass('btn-danger').addClass('btn-default')
+					}, 1000)
+				}
+				$('button#submit').click(submit)
+			})
 		</script>
 	</head>
 	<body>
@@ -85,16 +73,15 @@
 					<div class = 'panel panel-default'>
 						<div class = 'panel-heading' id = 'message-title'>Vote</div>
 						<div class = 'panel-body'>
-							<table class = 'table' id = 'votes'>
+							<table class = 'table table-striped' id = 'votes'>
 								<thead>
 									<tr>
-										<th>Votes</th><th>Quote</th>
+										<th>Click on a paragraph to select it</th>
 									</tr>
 								</thead>
-								<tbody>
-								</tbody>
+								<tbody></tbody>
 							</table>
-							<button class = 'btn btn-success' id = 'submit'>Submit</button>
+							<button class = 'btn btn-default' id = 'submit'>Submit</button>
 						</div>
 					</div>
 				</div>

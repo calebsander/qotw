@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs')
 
 module.exports = {
 	DOMAIN: fs.readFileSync(__dirname + '/domain.txt'),
@@ -11,5 +11,6 @@ module.exports = {
 	ARCHIVES: 'posts',
 	NEW_SUBMISSIONS: 'submissions-unused',
 	VOTE_TOKENS: 'vote-tokens',
-	CURRENT_VOTES: 'current-votes'
-};
+	CURRENT_VOTES: 'current-votes',
+	PARAGRAPHS: 'paragraphs'
+}

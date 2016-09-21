@@ -168,6 +168,7 @@ module.exports = redisClient => {
 					res.end(JSON.stringify({success: true}))
 					console.log('Created post: ' + title)
 				})
+				redisClient.del(constants.PARAGRAPHS, ifErrThrowErr)
 				redisClient.del(constants.CURRENT_VOTES, ifErrThrowErr)
 				redisClient.zremrangebyscore(constants.NEW_SUBMISSIONS, '-inf', data.cutoffTime, ifErrThrowErr)
 			})
