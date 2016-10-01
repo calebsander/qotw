@@ -212,6 +212,9 @@
 					clearInputs();
 				});
 			});
+			onbeforeunload = function() {
+				if ($('textarea#compose').val()) return 'You have unsaved changes; are you sure you want to leave?';
+			};
 		</script>
 	</head>
 	<body>
