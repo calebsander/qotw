@@ -141,6 +141,7 @@
 								$('button#submit').removeClass('btn-warning').addClass('btn-success');
 								$('input#title').val('');
 								$('textarea#compose').val('');
+								alert('Successfully posted "' + data.title + '"');
 							}
 							else {
 								alert(response.message);
